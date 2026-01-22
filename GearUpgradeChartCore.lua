@@ -5,8 +5,8 @@ AceGUI = LibStub("AceGUI-3.0")
 -- Global Variables
 GUF = nil
 -- Window dimensions
-GUF_WIDTH = 550
-GUF_HEIGHT = 400
+GUF_WIDTH = 650
+GUF_HEIGHT = 350
 -- Font sizes
 GUF_HEADER_FONT_SIZE = 14
 GUF_CONTENT_FONT_SIZE = 12
@@ -36,12 +36,30 @@ function GearUpgradeChart:CharacterFrameOnShow(frame)
         return
     end
 
-    -- Set up the Gear Upgrade Frame
+    -- Set up the Gear Upgrade "Frame"
     GUF = AceGUI:Create("Window")
     GUF:SetTitle("Gear Upgrade Chart: TWW Season 3")
-    GUF:SetLayout("List")
+    GUF:SetLayout("Fill")
     GUF:SetWidth(GUF_WIDTH)
     GUF:SetHeight(GUF_HEIGHT)
+
+    -- Set up Tabs infrastructre
+    local tabs = AceGUI:Create("TabGroup")
+    tabs:SetLayout("Flow")
+
+    tabs:SetTabs({
+        {text = "Gear Tiers", value = "gear_tiers"},
+        {text = "Rewards", value = "rewards"},
+        {text = "Currencies", value = "currencies"}
+    })
+
+    tabs:SetCallback("OnGroupSelected", function(container, event, group)
+        GearUpgradeChart:DrawTab(container, group)
+    end)
+
+    tabs:SelectTab("gear_tiers")
+
+    GUF:AddChild(tabs)
            
     -- Make window static size
     GUF.frame:IsResizable(false)
@@ -49,44 +67,21 @@ function GearUpgradeChart:CharacterFrameOnShow(frame)
     if GUF.sizer_se then
         GUF.sizer_se:Hide()
     end
-
-    GearUpgradeChart:GenerateItemLevels()
-    GearUpgradeChart:GenerateMPlusEndChest()
-    GearUpgradeChart:GenerateMPlusVault()
-    GearUpgradeChart:GenerateDelveRewards()
-    GearUpgradeChart:GenerateCurrencies()
-
-    GearUpgradeChart:PositionGUF()
-
-    GUF:Show()
 end
 
-function GearUpgradeChart:CharacterFrameOnHide(frame)
-    if GUF then
-        GUF:Hide()
-        GUF:Release()
-        GUF = nil
-        return
+function GearUpgradeChart:DrawTab(container, group)
+    container:ReleaseChildren()
+
+    if group == "gear_tiers" then
+        GearUpgradeChart:GenerateGearTiersTabContent(container)
+    elseif group == "rewards" then
+        GearUpgradeChart:GenerateRewardsTabContent(container)
+    elseif group == "currencies" then
+        GearUpgradeChart:GenerateCurrenciesTabContent(container)
     end
 end
 
-function GearUpgradeChart:CharacterFrameSetPoint(frame, point, relativeTo, relativePoint, xOffset, yOffset)
-    if GUF then
-        GearUpgradeChart:PositionGUF()
-    end
-end
-
-function GearUpgradeChart:PositionGUF()
-    -- Get CharacterFrame details
-    local characterFrameBottom = CharacterFrameTab1:GetBottom()
-    local characterFrameLeft = CharacterFrame:GetLeft()
-
-    -- Position the Gear Upgrade Frame
-    GUF:ClearAllPoints()
-    GUF:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", characterFrameLeft, characterFrameBottom)
-end
-
-function GearUpgradeChart:GenerateItemLevels()
+function GearUpgradeChart:GenerateGearTiersTabContent(container)
     -- Set up header row
     local headerContainer = AceGUI:Create("SimpleGroup")
     headerContainer:SetLayout("Flow")
@@ -106,7 +101,7 @@ function GearUpgradeChart:GenerateItemLevels()
         headerContainer:AddChild(hn)
     end
 
-    GUF:AddChild(headerContainer)
+    container:AddChild(headerContainer)
 
     -- Set up content rows
     -- TWW Season 3 Explorer and Adventurer are weird and have different upgrade paths
@@ -140,156 +135,102 @@ function GearUpgradeChart:GenerateItemLevels()
             rowContainer:AddChild(ilvlLabel)
         end
 
-        GUF:AddChild(rowContainer)
-    end
+        container:AddChild(rowContainer)
+    end    
 end
 
-function GearUpgradeChart:GenerateMPlusEndChest()
+function GearUpgradeChart:GenerateRewardsTabContent(container)
     -- Set up End Chests rows
-    local mPlusEndChestHeaderContainer = AceGUI:Create("SimpleGroup")
-    mPlusEndChestHeaderContainer:SetLayout("Flow")
-    mPlusEndChestHeaderContainer:SetFullWidth(true)
+    local headerContainer = AceGUI:Create("SimpleGroup")
+    headerContainer:SetLayout("Flow")
+    headerContainer:SetFullWidth(true)
 
-    local h1 = AceGUI:Create("Label")
-    h1:SetText("M+ End Chests")
-    h1:SetWidth(200)
-    h1:SetFont(GameFontNormal:GetFont(), GUF_HEADER_FONT_SIZE, "OUTLINE")
+    local headerCells = {{value = "Keystone/Delve Level", width = 150},
+                         {value = "M+ End Chest", width = 100},
+                         {value = "M+ Crests", width = 100},
+                         {value = "M+ Vault", width = 100},
+                         {value = "Delve Reward", width = 100}}
 
-    mPlusEndChestHeaderContainer:AddChild(h1)
-    GUF:AddChild(mPlusEndChestHeaderContainer)
+    for _, value in ipairs(headerCells) do
+        local h1 = AceGUI:Create("Label")
+        h1:SetText(value.value)
+        h1:SetWidth(value.width)
+        h1:SetFont(GameFontNormal:GetFont(), GUF_HEADER_FONT_SIZE, "OUTLINE")
+        headerContainer:AddChild(h1)
+    end
 
-    local mPlusEndChestRewards = {
-        {name = "Champion", dungeonlevels = {"2-3", "4", "5", "6"}, rgb = GUF_CHAMPION_RGB},
-        {name = "Hero", dungeonlevels = {"7-8", "9+"}, rgb = GUF_HERO_RGB}
+    container:AddChild(headerContainer)
+
+    local rows = {
+        {level = "1", mPlusEndChest = {reward = "Champion 1", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Champion 4", rgb = GUF_CHAMPION_RGB}, mPlusCrests = {reward = " ", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Veteran 1", rgb = GUF_VETERAN_RGB}},
+        {level = "2", mPlusEndChest = {reward = "Champion 2", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "10 Runed", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Veteran 1", rgb = GUF_VETERAN_RGB}},
+        {level = "3", mPlusEndChest = {reward = "Champion 2", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "12 Runed ", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Veteran 3", rgb = GUF_VETERAN_RGB}},
+        {level = "4", mPlusEndChest = {reward = "Champion 3", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Hero 2", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "14 Runed", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Champion 1", rgb = GUF_CHAMPION_RGB}},
+        {level = "5", mPlusEndChest = {reward = "Champion 4", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Hero 2", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "16 Runed ", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Champion 3", rgb = GUF_CHAMPION_RGB}},
+        {level = "6", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Hero 3", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "18 Runed", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Champion 4", rgb = GUF_CHAMPION_RGB}},
+        {level = "7", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Hero 4", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "10 Gilded ", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Hero 1", rgb = GUF_HERO_RGB}},
+        {level = "8", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Hero 4", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "12 Gilded", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Hero 3", rgb = GUF_HERO_RGB}},
+        {level = "9", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Hero 4", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "14 Gilded ", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Hero 3", rgb = GUF_HERO_RGB}},
+        {level = "10", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Myth 1", rgb = GUF_MYTH_RGB}, mPlusCrests = {reward = "16 Gilded", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Hero 3", rgb = GUF_HERO_RGB}},
+        {level = "11", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Myth 1", rgb = GUF_MYTH_RGB}, mPlusCrests = {reward = "18 Gilded", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Hero 3", rgb = GUF_HERO_RGB}},
+        {level = "12", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Myth 1", rgb = GUF_MYTH_RGB}, mPlusCrests = {reward = "20 Gilded", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Hero 3", rgb = GUF_HERO_RGB}}
     }
 
-    for _, chestInfo in ipairs(mPlusEndChestRewards) do
+    for _, row in ipairs(rows) do
         local rowContainer = AceGUI:Create("SimpleGroup")
         rowContainer:SetLayout("Flow")
         rowContainer:SetFullWidth(true)
 
-        local chestLabel = AceGUI:Create("Label")
-        chestLabel:SetText(chestInfo.name)
-        chestLabel:SetWidth(100)
-        chestLabel.label:SetTextColor(chestInfo.rgb[1]/255, chestInfo.rgb[2]/255, chestInfo.rgb[3]/255)
-        chestLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
-        rowContainer:AddChild(chestLabel)
+        local levelLabel = AceGUI:Create("Label")
+        levelLabel:SetText(row.level)
+        levelLabel:SetWidth(150)
+        levelLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
+        rowContainer:AddChild(levelLabel)
 
-        for _, dungeonlevel in ipairs(chestInfo.dungeonlevels) do
-            local dlLabel = AceGUI:Create("Label")
-            dlLabel:SetText(dungeonlevel)
-            dlLabel:SetWidth(50)
-            dlLabel.label:SetTextColor(chestInfo.rgb[1]/255, chestInfo.rgb[2]/255, chestInfo.rgb[3]/255)
-            dlLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
-            rowContainer:AddChild(dlLabel)
-        end
+        local mPlusEndChestLabel = AceGUI:Create("Label")
+        mPlusEndChestLabel:SetText(row.mPlusEndChest.reward)
+        mPlusEndChestLabel:SetWidth(100)
+        mPlusEndChestLabel.label:SetTextColor(row.mPlusEndChest.rgb[1]/255, row.mPlusEndChest.rgb[2]/255, row.mPlusEndChest.rgb[3]/255)
+        mPlusEndChestLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
+        rowContainer:AddChild(mPlusEndChestLabel)
 
-        GUF:AddChild(rowContainer)
+        local mPlusCrestsLabel = AceGUI:Create("Label")
+        mPlusCrestsLabel:SetText(row.mPlusCrests.reward)
+        mPlusCrestsLabel:SetWidth(100)
+        mPlusCrestsLabel.label:SetTextColor(row.mPlusCrests.rgb[1]/255, row.mPlusCrests.rgb[2]/255, row.mPlusCrests.rgb[3]/255)
+        mPlusCrestsLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
+        rowContainer:AddChild(mPlusCrestsLabel)
+
+        local mPlusVaultLabel = AceGUI:Create("Label")
+        mPlusVaultLabel:SetText(row.mPlusVault.reward)
+        mPlusVaultLabel:SetWidth(100)
+        mPlusVaultLabel.label:SetTextColor(row.mPlusVault.rgb[1]/255, row.mPlusVault.rgb[2]/255, row.mPlusVault.rgb[3]/255)
+        mPlusVaultLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
+        rowContainer:AddChild(mPlusVaultLabel)
+        
+        local delveRewardLabel = AceGUI:Create("Label")
+        delveRewardLabel:SetText(row.delveReward.reward)
+        delveRewardLabel:SetWidth(100)
+        delveRewardLabel.label:SetTextColor(row.delveReward.rgb[1]/255, row.delveReward.rgb[2]/255, row.delveReward.rgb[3]/255)
+        delveRewardLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
+        rowContainer:AddChild(delveRewardLabel)
+
+        container:AddChild(rowContainer)
     end
 end
 
-function GearUpgradeChart:GenerateMPlusVault()
-    -- Set up Vault rows
-    local mPlusVaultHeaderContainer = AceGUI:Create("SimpleGroup")
-    mPlusVaultHeaderContainer:SetLayout("Flow")
-    mPlusVaultHeaderContainer:SetFullWidth(true)
-
-    local h1 = AceGUI:Create("Label")
-    h1:SetText("M+ Vaults")
-    h1:SetWidth(200)
-    h1:SetFont(GameFontNormal:GetFont(), GUF_HEADER_FONT_SIZE, "OUTLINE")
-
-    mPlusVaultHeaderContainer:AddChild(h1)
-    GUF:AddChild(mPlusVaultHeaderContainer)
-
-   local mPlusVaultRewards = {
-        {name = "Champion", dungeonlevels = {" ", " ", " ", "2"}, rgb = GUF_CHAMPION_RGB},
-        {name = "Hero", dungeonlevels = {"3-4", "5-6", "7", "8-9"}, rgb = GUF_HERO_RGB},
-        {name = "Myth", dungeonlevels = {"10+"}, rgb = GUF_MYTH_RGB}
-    }
-
-    for _, vaultInfo in ipairs(mPlusVaultRewards) do
-        local rowContainer = AceGUI:Create("SimpleGroup")
-        rowContainer:SetLayout("Flow")
-        rowContainer:SetFullWidth(true)
-
-        local vaultLabel = AceGUI:Create("Label")
-        vaultLabel:SetText(vaultInfo.name)
-        vaultLabel:SetWidth(100)
-        vaultLabel.label:SetTextColor(vaultInfo.rgb[1]/255, vaultInfo.rgb[2]/255, vaultInfo.rgb[3]/255)
-        vaultLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
-        rowContainer:AddChild(vaultLabel)
-
-        for _, dungeonlevel in ipairs(vaultInfo.dungeonlevels) do
-            local dlLabel = AceGUI:Create("Label")
-            dlLabel:SetText(dungeonlevel)
-            dlLabel:SetWidth(50)
-            dlLabel.label:SetTextColor(vaultInfo.rgb[1]/255, vaultInfo.rgb[2]/255, vaultInfo.rgb[3]/255)
-            dlLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
-            rowContainer:AddChild(dlLabel)
-        end
-
-        GUF:AddChild(rowContainer)
-    end
-end
-
-function GearUpgradeChart:GenerateDelveRewards()
-    -- Set up Delve rows
-    local delveHeaderContainer = AceGUI:Create("SimpleGroup")
-    delveHeaderContainer:SetLayout("Flow")
-    delveHeaderContainer:SetFullWidth(true)
-
-    local h1 = AceGUI:Create("Label")
-    h1:SetText("Delve Rewards")
-    h1:SetWidth(200)
-    h1:SetFont(GameFontNormal:GetFont(), GUF_HEADER_FONT_SIZE, "OUTLINE")
-
-    delveHeaderContainer:AddChild(h1)
-    GUF:AddChild(delveHeaderContainer)
-
-    local delveRewards = {
-        {name = "Veteran", delveLevels ={"1-2", "3"}, rgb = GUF_VETERAN_RGB},
-        {name = "Champion", delveLevels ={"4", " ", "5", "6"}, rgb = GUF_CHAMPION_RGB},
-        {name = "Hero", delveLevels ={"7", " ", "8"}, rgb = GUF_HERO_RGB}
-    }
-
-    for _, delveInfo in ipairs(delveRewards) do
-        local rowContainer = AceGUI:Create("SimpleGroup")
-        rowContainer:SetLayout("Flow")
-        rowContainer:SetFullWidth(true)
-
-        local delveLabel = AceGUI:Create("Label")
-        delveLabel:SetText(delveInfo.name)
-        delveLabel:SetWidth(100)
-        delveLabel.label:SetTextColor(delveInfo.rgb[1]/255, delveInfo.rgb[2]/255, delveInfo.rgb[3]/255)
-        delveLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
-        rowContainer:AddChild(delveLabel)
-
-        for _, delveLevel in ipairs(delveInfo.delveLevels) do
-            local dlLabel = AceGUI:Create("Label")
-            dlLabel:SetText(delveLevel)
-            dlLabel:SetWidth(50)
-            dlLabel.label:SetTextColor(delveInfo.rgb[1]/255, delveInfo.rgb[2]/255, delveInfo.rgb[3]/255)
-            dlLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
-            rowContainer:AddChild(dlLabel)
-        end
-
-        GUF:AddChild(rowContainer)
-    end
-end
-
-function GearUpgradeChart:GenerateCurrencies()
-    local currencyHeaderContainer = AceGUI:Create("SimpleGroup")
-    currencyHeaderContainer:SetLayout("Flow")
-    currencyHeaderContainer:SetFullWidth(true)
+function GearUpgradeChart:GenerateCurrenciesTabContent(container)
+    local headerContainer = AceGUI:Create("SimpleGroup")
+    headerContainer:SetLayout("Flow")
+    headerContainer:SetFullWidth(true)
 
     local h1 = AceGUI:Create("Label")
     h1:SetText("Currencies")
     h1:SetWidth(200)
     h1:SetFont(GameFontNormal:GetFont(), GUF_HEADER_FONT_SIZE, "OUTLINE")
 
-    currencyHeaderContainer:AddChild(h1)
-    GUF:AddChild(currencyHeaderContainer)
+    headerContainer:AddChild(h1)
+    container:AddChild(headerContainer)
 
     local currencies = {
         {name = "Weathered", id = GUF_WEATHERED_ID},
@@ -317,7 +258,31 @@ function GearUpgradeChart:GenerateCurrencies()
         currencyAmountLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
         rowContainer:AddChild(currencyAmountLabel)
 
-        GUF:AddChild(rowContainer)
+        container:AddChild(rowContainer)   
     end
+end
 
+function GearUpgradeChart:CharacterFrameOnHide(frame)
+    if GUF then
+        GUF:Hide()
+        GUF:Release()
+        GUF = nil
+        return
+    end
+end
+
+function GearUpgradeChart:CharacterFrameSetPoint(frame, point, relativeTo, relativePoint, xOffset, yOffset)
+    if GUF then
+        GearUpgradeChart:PositionGUF()
+    end
+end
+
+function GearUpgradeChart:PositionGUF()
+    -- Get CharacterFrame details
+    local characterFrameBottom = CharacterFrameTab1:GetBottom()
+    local characterFrameLeft = CharacterFrame:GetLeft()
+
+    -- Position the Gear Upgrade Frame
+    GUF:ClearAllPoints()
+    GUF:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", characterFrameLeft, characterFrameBottom)
 end
