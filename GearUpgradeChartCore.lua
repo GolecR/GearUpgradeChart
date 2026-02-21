@@ -18,11 +18,13 @@ GUF_CHAMPION_RGB = {0, 112, 221}
 GUF_HERO_RGB = {163, 53, 238}
 GUF_MYTH_RGB = {255, 128, 0}
 -- Currency IDs
-GUF_WEATHERED_ID = 3284
-GUF_CARVED_ID = 3286
-GUF_RUNED_ID = 3288
-GUF_GILDED_ID = 3290
-
+GUF_ADVENTURER_ID = 3383
+GUF_VETERAN_ID = 3341
+GUF_CHAMPION_ID = 3343
+GUF_HERO_ID = 3345
+GUF_MYTH_ID = 3347
+GUF_CATALYST_ID = 3378
+GUF_SPARK_ID = 3212
 
 function GearUpgradeChart:OnInitialize()
     self:HookScript(CharacterFrame, "OnShow", "CharacterFrameOnShow")
@@ -38,7 +40,7 @@ function GearUpgradeChart:CharacterFrameOnShow(frame)
 
     -- Set up the Gear Upgrade "Frame"
     GUF = AceGUI:Create("Window")
-    GUF:SetTitle("Gear Upgrade Chart: TWW Season 3")
+    GUF:SetTitle("Gear Upgrade Chart: Midnight Season 1")
     GUF:SetLayout("Fill")
     GUF:SetWidth(GUF_WIDTH)
     GUF:SetHeight(GUF_HEIGHT)
@@ -60,7 +62,7 @@ function GearUpgradeChart:CharacterFrameOnShow(frame)
     tabs:SelectTab("gear_tiers")
 
     GUF:AddChild(tabs)
-           
+
     -- Make window static size
     GUF.frame:IsResizable(false)
     GUF.frame:SetResizeBounds(GUF_WIDTH, GUF_HEIGHT, GUF_WIDTH, GUF_HEIGHT)
@@ -93,7 +95,7 @@ function GearUpgradeChart:GenerateGearTiersTabContent(container)
     h1:SetFont(GameFontNormal:GetFont(), GUF_HEADER_FONT_SIZE, "OUTLINE")
     headerContainer:AddChild(h1)
 
-    for i = 1, 8, 1 do
+    for i = 1, 6, 1 do
         local hn = AceGUI:Create("Label")
         hn:SetText(tostring(i))
         hn:SetWidth(50)
@@ -104,14 +106,12 @@ function GearUpgradeChart:GenerateGearTiersTabContent(container)
     container:AddChild(headerContainer)
 
     -- Set up content rows
-    -- TWW Season 3 Explorer and Adventurer are weird and have different upgrade paths
     local gearLevels = {
-        {level = "Explorer", ilvls = {98, 99, 100, 101, 102, 103, 104, 105}, rgb = GUF_EXPLORER_RGB },
-        {level = "Adventurer", ilvls = {102, 103, 104, 105, 108, 111, 115, 118}, rgb = GUF_ADVENTURER_RGB },
-        {level = "Veteran", ilvls = {108, 111, 115, 118, 121, 124, 128, 131}, rgb = GUF_VETERAN_RGB },
-        {level = "Champion", ilvls = {121, 124, 128, 131, 134, 137, 141, 144}, rgb = GUF_CHAMPION_RGB },
-        {level = "Hero", ilvls = {134, 137, 141, 144, 147, 150, 154, 157}, rgb = GUF_HERO_RGB },
-        {level = "Myth", ilvls = {147, 150, 154, 157, 160, 163, 167, 170}, rgb = GUF_MYTH_RGB }
+        {level = "Adventurer", ilvls = {220, 224, 227, 230, 233, 237}, rgb = GUF_ADVENTURER_RGB },
+        {level = "Veteran", ilvls =    {233, 237, 240, 243, 246, 250}, rgb = GUF_VETERAN_RGB },
+        {level = "Champion", ilvls =   {246, 250, 253, 256, 259, 263}, rgb = GUF_CHAMPION_RGB },
+        {level = "Hero", ilvls =       {259, 263, 266, 269, 272, 276}, rgb = GUF_HERO_RGB },
+        {level = "Myth", ilvls =       {272, 276, 279, 282, 285, 289}, rgb = GUF_MYTH_RGB }
     }
 
     for _, gearInfo in ipairs(gearLevels) do
@@ -149,7 +149,7 @@ function GearUpgradeChart:GenerateRewardsTabContent(container)
                          {value = "M+ End Chest", width = 100},
                          {value = "M+ Crests", width = 100},
                          {value = "M+ Vault", width = 100},
-                         {value = "Delve Reward", width = 100}}
+                         {value = "Delve Vault", width = 100}}
 
     for _, value in ipairs(headerCells) do
         local h1 = AceGUI:Create("Label")
@@ -162,18 +162,18 @@ function GearUpgradeChart:GenerateRewardsTabContent(container)
     container:AddChild(headerContainer)
 
     local rows = {
-        {level = "1", mPlusEndChest = {reward = "Champion 1", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Champion 4", rgb = GUF_CHAMPION_RGB}, mPlusCrests = {reward = " ", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Veteran 1", rgb = GUF_VETERAN_RGB}},
-        {level = "2", mPlusEndChest = {reward = "Champion 2", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "10 Runed", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Veteran 1", rgb = GUF_VETERAN_RGB}},
-        {level = "3", mPlusEndChest = {reward = "Champion 2", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "12 Runed ", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Veteran 3", rgb = GUF_VETERAN_RGB}},
-        {level = "4", mPlusEndChest = {reward = "Champion 3", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Hero 2", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "14 Runed", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Champion 1", rgb = GUF_CHAMPION_RGB}},
-        {level = "5", mPlusEndChest = {reward = "Champion 4", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Hero 2", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "16 Runed ", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Champion 3", rgb = GUF_CHAMPION_RGB}},
-        {level = "6", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Hero 3", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "18 Runed", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Champion 4", rgb = GUF_CHAMPION_RGB}},
-        {level = "7", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Hero 4", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "10 Gilded ", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Hero 1", rgb = GUF_HERO_RGB}},
-        {level = "8", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Hero 4", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "12 Gilded", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Hero 3", rgb = GUF_HERO_RGB}},
-        {level = "9", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Hero 4", rgb = GUF_HERO_RGB}, mPlusCrests = {reward = "14 Gilded ", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Hero 3", rgb = GUF_HERO_RGB}},
-        {level = "10", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Myth 1", rgb = GUF_MYTH_RGB}, mPlusCrests = {reward = "16 Gilded", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Hero 3", rgb = GUF_HERO_RGB}},
-        {level = "11", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Myth 1", rgb = GUF_MYTH_RGB}, mPlusCrests = {reward = "18 Gilded", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Hero 3", rgb = GUF_HERO_RGB}},
-        {level = "12", mPlusEndChest = {reward = "Hero 1", rgb = GUF_HERO_RGB}, mPlusVault = {reward = "Myth 1", rgb = GUF_MYTH_RGB}, mPlusCrests = {reward = "20 Gilded", rgb = GUF_ADVENTURER_RGB}, delveReward = {reward = "Hero 3", rgb = GUF_HERO_RGB}}
+        {level = "1", mPlusEndChest =  {reward = "Champion 1", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Champion 4", rgb = GUF_CHAMPION_RGB}, mPlusCrests = {reward = " ", rgb = GUF_ADVENTURER_RGB},  delveReward = {reward = "Veteran 1", rgb = GUF_VETERAN_RGB}},
+        {level = "2", mPlusEndChest =  {reward = "Champion 2", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Hero 1", rgb = GUF_HERO_RGB},         mPlusCrests = {reward = "10 Hero", rgb = GUF_HERO_RGB},  delveReward = {reward = "Veteran 2", rgb = GUF_VETERAN_RGB}},
+        {level = "3", mPlusEndChest =  {reward = "Champion 2", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Hero 1", rgb = GUF_HERO_RGB},         mPlusCrests = {reward = "12 Hero ", rgb = GUF_HERO_RGB}, delveReward = {reward = "Veteran 3", rgb = GUF_VETERAN_RGB}},
+        {level = "4", mPlusEndChest =  {reward = "Champion 3", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Hero 2", rgb = GUF_HERO_RGB},         mPlusCrests = {reward = "14 Hero", rgb = GUF_HERO_RGB},  delveReward = {reward = "Veteran 4", rgb = GUF_VETERAN_RGB}},
+        {level = "5", mPlusEndChest =  {reward = "Champion 4", rgb = GUF_CHAMPION_RGB}, mPlusVault = {reward = "Hero 2", rgb = GUF_HERO_RGB},         mPlusCrests = {reward = "16 Hero ", rgb = GUF_HERO_RGB}, delveReward = {reward = "Champion 1", rgb = GUF_CHAMPION_RGB}},
+        {level = "6", mPlusEndChest =  {reward = "Hero 1", rgb = GUF_HERO_RGB},         mPlusVault = {reward = "Hero 3", rgb = GUF_HERO_RGB},         mPlusCrests = {reward = "18 Hero", rgb = GUF_HERO_RGB},  delveReward = {reward = "Champion 3", rgb = GUF_CHAMPION_RGB}},
+        {level = "7", mPlusEndChest =  {reward = "Hero 1", rgb = GUF_HERO_RGB},         mPlusVault = {reward = "Hero 4", rgb = GUF_HERO_RGB},         mPlusCrests = {reward = "10 Myth ", rgb = GUF_MYTH_RGB}, delveReward = {reward = "Champion 4", rgb = GUF_CHAMPION_RGB}},
+        {level = "8", mPlusEndChest =  {reward = "Hero 2", rgb = GUF_HERO_RGB},         mPlusVault = {reward = "Hero 4", rgb = GUF_HERO_RGB},         mPlusCrests = {reward = "12 Myth", rgb = GUF_MYTH_RGB},  delveReward = {reward = "Hero 1", rgb = GUF_HERO_RGB}},
+        {level = "9", mPlusEndChest =  {reward = "Hero 2", rgb = GUF_HERO_RGB},         mPlusVault = {reward = "Hero 4", rgb = GUF_HERO_RGB},         mPlusCrests = {reward = "14 Myth ", rgb = GUF_MYTH_RGB}, delveReward = {reward = "Hero 1", rgb = GUF_HERO_RGB}},
+        {level = "10", mPlusEndChest = {reward = "Hero 3", rgb = GUF_HERO_RGB},         mPlusVault = {reward = "Myth 1", rgb = GUF_MYTH_RGB},         mPlusCrests = {reward = "16 Myth", rgb = GUF_MYTH_RGB},  delveReward = {reward = "Hero 1", rgb = GUF_HERO_RGB}},
+        {level = "11", mPlusEndChest = {reward = "Hero 3", rgb = GUF_HERO_RGB},         mPlusVault = {reward = "Myth 1", rgb = GUF_MYTH_RGB},         mPlusCrests = {reward = "18 Myth", rgb = GUF_MYTH_RGB},  delveReward = {reward = "Hero 1", rgb = GUF_HERO_RGB}},
+        {level = "12", mPlusEndChest = {reward = "Hero 3", rgb = GUF_HERO_RGB},         mPlusVault = {reward = "Myth 1", rgb = GUF_MYTH_RGB},         mPlusCrests = {reward = "20 Myth", rgb = GUF_MYTH_RGB},  delveReward = {reward = "Hero 1", rgb = GUF_HERO_RGB}}
     }
 
     for _, row in ipairs(rows) do
@@ -233,10 +233,13 @@ function GearUpgradeChart:GenerateCurrenciesTabContent(container)
     container:AddChild(headerContainer)
 
     local currencies = {
-        {name = "Weathered", id = GUF_WEATHERED_ID},
-        {name = "Carved", id = GUF_CARVED_ID},
-        {name = "Runed", id = GUF_RUNED_ID},
-        {name = "Gilded", id = GUF_GILDED_ID}
+        {name = "Adventurer Crests", id = GUF_ADVENTURER_ID, rgb = GUF_ADVENTURER_RGB},
+        {name = "Veteran Crests", id = GUF_VETERAN_ID, rgb = GUF_VETERAN_RGB},
+        {name = "Champion Crests", id = GUF_CHAMPION_ID, rgb = GUF_CHAMPION_RGB},
+        {name = "Hero Crests", id = GUF_HERO_ID, rgb = GUF_HERO_RGB},
+        {name = "Myth Crests", id = GUF_MYTH_ID, rgb = GUF_MYTH_RGB},
+        {name = "Catalysts", id = GUF_CATALYST_ID, rgb = GUF_ADVENTURER_RGB},
+        {name = "Sparks", id = GUF_SPARK_ID, rgb = GUF_ADVENTURER_RGB}
     }
 
     for _, currencyInfo in ipairs(currencies) do
@@ -248,6 +251,7 @@ function GearUpgradeChart:GenerateCurrenciesTabContent(container)
         currencyLabel:SetText(currencyInfo.name)
         currencyLabel:SetWidth(100)
         currencyLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
+        currencyLabel.label:SetTextColor(currencyInfo.rgb[1]/255, currencyInfo.rgb[2]/255, currencyInfo.rgb[3]/255)
         rowContainer:AddChild(currencyLabel)
 
         local currencyAmountLabel = AceGUI:Create("Label")
@@ -256,10 +260,13 @@ function GearUpgradeChart:GenerateCurrenciesTabContent(container)
         currencyAmountLabel:SetText(string.format("%d (Earnable: %s)", currencyInfoData.quantity, currencyInfoData.maxQuantity - currencyInfoData.totalEarned >= 0 and tostring(currencyInfoData.maxQuantity - currencyInfoData.totalEarned) or "uncapped"))
         currencyAmountLabel:SetWidth(200)
         currencyAmountLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
+        currencyAmountLabel.label:SetTextColor(currencyInfo.rgb[1]/255, currencyInfo.rgb[2]/255, currencyInfo.rgb[3]/255)
         rowContainer:AddChild(currencyAmountLabel)
 
-        container:AddChild(rowContainer)   
+        container:AddChild(rowContainer)
     end
+
+    local mPlusRewards = C_WeeklyRewards.GetActivities(1)
 end
 
 function GearUpgradeChart:CharacterFrameOnHide(frame)
