@@ -27,8 +27,8 @@ GUF_CATALYST_ID = 3378
 GUF_SPARK_ID = 3212
 
 function GearUpgradeChart:OnInitialize()
-    self:HookScript(CharacterFrame, "OnShow", "CharacterFrameOnShow")
-    self:HookScript(CharacterFrame, "OnHide", "CharacterFrameOnHide")
+    CharacterFrame:HookScript("OnShow", function() GearUpgradeChart:CharacterFrameOnShow() end)
+    CharacterFrame:HookScript("OnHide", function() GearUpgradeChart:CharacterFrameOnHide() end)
     hooksecurefunc(CharacterFrame, "SetPoint", GearUpgradeChart.CharacterFrameSetPoint)
 end
 
