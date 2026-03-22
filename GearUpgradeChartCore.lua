@@ -25,6 +25,8 @@ GUF_HERO_ID = 3345
 GUF_MYTH_ID = 3347
 GUF_CATALYST_ID = 3378
 GUF_SPARK_ID = 3212
+GUF_KEY_SHARD_ID = 3310
+GUF_KEY_ID = 3028
 
 function GearUpgradeChart:OnInitialize()
     CharacterFrame:HookScript("OnShow", function() GearUpgradeChart:CharacterFrameOnShow() end)
@@ -239,7 +241,9 @@ function GearUpgradeChart:GenerateCurrenciesTabContent(container)
         {name = "Hero Crests", id = GUF_HERO_ID, rgb = GUF_HERO_RGB},
         {name = "Myth Crests", id = GUF_MYTH_ID, rgb = GUF_MYTH_RGB},
         {name = "Catalysts", id = GUF_CATALYST_ID, rgb = GUF_ADVENTURER_RGB},
-        {name = "Sparks", id = GUF_SPARK_ID, rgb = GUF_ADVENTURER_RGB}
+        {name = "Sparks", id = GUF_SPARK_ID, rgb = GUF_ADVENTURER_RGB},
+        {name = "Key Shards", id = GUF_KEY_SHARD_ID, rgb = GUF_ADVENTURER_RGB},
+        {name = "Keys", id = GUF_KEY_ID, rgb = GUF_ADVENTURER_RGB}
     }
 
     for _, currencyInfo in ipairs(currencies) do
