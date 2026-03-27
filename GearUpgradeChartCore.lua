@@ -235,15 +235,15 @@ function GearUpgradeChart:GenerateCurrenciesTabContent(container)
     container:AddChild(headerContainer)
 
     local currencies = {
-        {name = "Adventurer Crests", id = GUF_ADVENTURER_ID, rgb = GUF_ADVENTURER_RGB},
-        {name = "Veteran Crests", id = GUF_VETERAN_ID, rgb = GUF_VETERAN_RGB},
-        {name = "Champion Crests", id = GUF_CHAMPION_ID, rgb = GUF_CHAMPION_RGB},
-        {name = "Hero Crests", id = GUF_HERO_ID, rgb = GUF_HERO_RGB},
-        {name = "Myth Crests", id = GUF_MYTH_ID, rgb = GUF_MYTH_RGB},
-        {name = "Catalysts", id = GUF_CATALYST_ID, rgb = GUF_ADVENTURER_RGB},
-        {name = "Sparks", id = GUF_SPARK_ID, rgb = GUF_ADVENTURER_RGB},
-        {name = "Key Shards", id = GUF_KEY_SHARD_ID, rgb = GUF_ADVENTURER_RGB},
-        {name = "Keys", id = GUF_KEY_ID, rgb = GUF_ADVENTURER_RGB}
+        {name = "Adventurer Crests", id = GUF_ADVENTURER_ID, rgb = GUF_ADVENTURER_RGB, seasonal_cap = true},
+        {name = "Veteran Crests", id = GUF_VETERAN_ID, rgb = GUF_VETERAN_RGB, seasonal_cap = true},
+        {name = "Champion Crests", id = GUF_CHAMPION_ID, rgb = GUF_CHAMPION_RGB, seasonal_cap = true},
+        {name = "Hero Crests", id = GUF_HERO_ID, rgb = GUF_HERO_RGB, seasonal_cap = true},
+        {name = "Myth Crests", id = GUF_MYTH_ID, rgb = GUF_MYTH_RGB, seasonal_cap = true},
+        {name = "Catalysts", id = GUF_CATALYST_ID, rgb = GUF_ADVENTURER_RGB, seasonal_cap = true},
+        {name = "Sparks", id = GUF_SPARK_ID, rgb = GUF_ADVENTURER_RGB, seasonal_cap = true},
+        {name = "Key Shards", id = GUF_KEY_SHARD_ID, rgb = GUF_ADVENTURER_RGB, seasonal_cap = false},
+        {name = "Keys", id = GUF_KEY_ID, rgb = GUF_ADVENTURER_RGB, seasonal_cap = false}
     }
 
     for _, currencyInfo in ipairs(currencies) do
@@ -261,7 +261,12 @@ function GearUpgradeChart:GenerateCurrenciesTabContent(container)
         local currencyAmountLabel = AceGUI:Create("Label")
         local currencyInfoData = C_CurrencyInfo.GetCurrencyInfo(currencyInfo.id)
 
-        currencyAmountLabel:SetText(string.format("%d (Earnable: %s)", currencyInfoData.quantity, currencyInfoData.maxQuantity - currencyInfoData.totalEarned >= 0 and tostring(currencyInfoData.maxQuantity - currencyInfoData.totalEarned) or "uncapped"))
+        if currencyInfo.seasonal_cap then
+            currencyAmountLabel:SetText(string.format("%d (Earnable: %s)", currencyInfoData.quantity, currencyInfoData.maxQuantity - currencyInfoData.totalEarned >= 0 and tostring(currencyInfoData.maxQuantity - currencyInfoData.totalEarned) or "uncapped"))
+        else
+            currencyAmountLabel:SetText(string.format("%d (Earnable: %s)", currencyInfoData.quantity, currencyInfoData.maxWeeklyQuantity - currencyInfoData.quantityEarnedThisWeek >= 0 and tostring(currencyInfoData.maxWeeklyQuantity - currencyInfoData.quantityEarnedThisWeek) or "uncapped"))
+        end
+        
         currencyAmountLabel:SetWidth(200)
         currencyAmountLabel:SetFont(GameFontNormal:GetFont(), GUF_CONTENT_FONT_SIZE, "OUTLINE")
         currencyAmountLabel.label:SetTextColor(currencyInfo.rgb[1]/255, currencyInfo.rgb[2]/255, currencyInfo.rgb[3]/255)
