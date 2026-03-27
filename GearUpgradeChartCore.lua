@@ -54,7 +54,8 @@ function GearUpgradeChart:CharacterFrameOnShow(frame)
     tabs:SetTabs({
         {text = "Gear Tiers", value = "gear_tiers"},
         {text = "Rewards", value = "rewards"},
-        {text = "Currencies", value = "currencies"}
+        {text = "Currencies", value = "currencies"},
+        {text = "Great Vault", value = "vault" }
     })
 
     tabs:SetCallback("OnGroupSelected", function(container, event, group)
@@ -82,6 +83,8 @@ function GearUpgradeChart:DrawTab(container, group)
         GearUpgradeChart:GenerateRewardsTabContent(container)
     elseif group == "currencies" then
         GearUpgradeChart:GenerateCurrenciesTabContent(container)
+    elseif group == "vault" then
+        WeeklyRewards_ShowUI()
     end
 end
 
