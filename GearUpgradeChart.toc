@@ -1,8 +1,9 @@
-## Interface: 120000, 120001
+## Interface: 120000, 120001, 120005
 ## X-Min-Interface: 120000
 ## Title: Gear Upgrade Chart
 ## Notes: Shows Gear upgrades levels and related currencies
 ## Author: Apatia
+## SavedVariables: GearUpgradeChartDB
 ## Version: 0.1.1
 
 libs\LibStub\LibStub.lua

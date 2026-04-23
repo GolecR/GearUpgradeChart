@@ -27,8 +27,21 @@ GUF_CATALYST_ID = 3378
 GUF_SPARK_ID = 3212
 GUF_KEY_SHARD_ID = 3310
 GUF_KEY_ID = 3028
+GUF_BONUS_ROLL_ID = 3418
+
+local defaults = {
+    profile = {
+        tabs = {
+            selected = "gear_tiers"
+        }
+    }
+}
 
 function GearUpgradeChart:OnInitialize()
+    -- Setup DB
+    self.db = LibStub("AceDB-3.0"):New("GearUpgradeChartDB", defaults, true)
+
+    -- Hook Character Frame events
     CharacterFrame:HookScript("OnShow", function() GearUpgradeChart:CharacterFrameOnShow() end)
     CharacterFrame:HookScript("OnHide", function() GearUpgradeChart:CharacterFrameOnHide() end)
     hooksecurefunc(CharacterFrame, "SetPoint", GearUpgradeChart.CharacterFrameSetPoint)
@@ -62,7 +75,7 @@ function GearUpgradeChart:CharacterFrameOnShow(frame)
         GearUpgradeChart:DrawTab(container, group)
     end)
 
-    tabs:SelectTab("gear_tiers")
+    tabs:SelectTab(self.db.profile.tabs.selected)
 
     GUF:AddChild(tabs)
 
@@ -79,10 +92,13 @@ function GearUpgradeChart:DrawTab(container, group)
 
     if group == "gear_tiers" then
         GearUpgradeChart:GenerateGearTiersTabContent(container)
+        self.db.profile.tabs.selected = group
     elseif group == "rewards" then
         GearUpgradeChart:GenerateRewardsTabContent(container)
+        self.db.profile.tabs.selected = group
     elseif group == "currencies" then
         GearUpgradeChart:GenerateCurrenciesTabContent(container)
+        self.db.profile.tabs.selected = group
     elseif group == "vault" then
         WeeklyRewards_ShowUI()
     end
@@ -282,7 +298,8 @@ function GearUpgradeChart:GenerateCurrenciesTabContent(container)
         {name = "Catalysts", id = GUF_CATALYST_ID, rgb = GUF_ADVENTURER_RGB, seasonal_cap = true},
         {name = "Sparks", id = GUF_SPARK_ID, rgb = GUF_ADVENTURER_RGB, seasonal_cap = true},
         {name = "Key Shards", id = GUF_KEY_SHARD_ID, rgb = GUF_ADVENTURER_RGB, seasonal_cap = false},
-        {name = "Keys", id = GUF_KEY_ID, rgb = GUF_ADVENTURER_RGB, seasonal_cap = false}
+        {name = "Keys", id = GUF_KEY_ID, rgb = GUF_ADVENTURER_RGB, seasonal_cap = false},
+        {name = "Bonus Rolls", id = GUF_BONUS_ROLL_ID, rgb = GUF_ADVENTURER_RGB, seasonal_cap = true}
     }
 
     for _, currencyInfo in ipairs(currencies) do
